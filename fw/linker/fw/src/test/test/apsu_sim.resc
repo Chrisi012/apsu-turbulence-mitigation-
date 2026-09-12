@@ -1,0 +1,18 @@
+# ==============================================================================
+# Renode Script: APSU-01 Virtual HIL Simulation
+# ==============================================================================
+
+using sysbus
+mach create "apsu_supervisor"
+
+machine LoadPlatformDescription @test/apsu_target.repl
+
+# Load compiled bare-metal ELF binary
+sysbus LoadELF @fw/build/apsu_fw.elf
+
+# Setup log output
+logLevel 2
+cpu PerformanceInMips 170
+
+# Emulation start hook
+echo "APSU-01 Safety Supervisor Emulation Initialized."
