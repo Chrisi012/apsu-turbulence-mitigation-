@@ -1,0 +1,85 @@
+* ==============================================================================
+* APSU-01: Power Buffer, eFuse & Dynamic Brake SPICE Netlist
+* Compatible: LTspice / QSPICE / ngspice
+* Target: Rotax 14V Bus, Hybrid EDLC Bank (8.33F), 40A Analog Trip, 1.5R Brake
+* ==============================================================================
+
+.title APSU-01 Transient Simulation
+
+* ------------------------------------------------------------------------------
+* PARAMETERS
+* ------------------------------------------------------------------------------
+.param V_BUS_NOM=14.0
+.param R_BUS_INTERNAL=0.18
+.param I_PRECHARGE_LIMIT=5.0
+.param TRIP_CURRENT=40.0
+.param R_SHUNT=0.002
+.param C_POLY_BANK=4000u
+.param ESR_POLY=0.002
+.param C_EDLC_STRING=8.33
+.param ESR_EDLC_STRING=0.075
+.param R_BRAKE=1.5
+
+* ------------------------------------------------------------------------------
+* 1. AIRCRAFT 14V BUS & GENERATOR (Rotax 912/915 Equivalent)
+* ------------------------------------------------------------------------------
+V_bus_raw bus_raw 0 DC {V_BUS_NOM}
+R_bus bus_raw bus_filt {R_BUS_INTERNAL}
+
+* Simple representation of DO-160G Differential/Common Pi-Filter
+L_filt1 bus_filt bus_node1 4.7u Rser=0.015
+C_filt1 bus_node1 0 22u
+L_filt2 bus_node1 bus_in 4.7u Rser=0.015
+C_filt2 bus_in 0 47u
+
+* ------------------------------------------------------------------------------
+* 2. ACTIVE PRECHARGE & REVERSE BLOCKING (Back-to-Back Switch)
+* ------------------------------------------------------------------------------
+* Limits current to 5.0A until V(vcap) >= 13.5V
+B_charge bus_in cap_in I = min({I_PRECHARGE_LIMIT}, max(0, (V(bus_in)-V(cap_in))*20))
+
+* ------------------------------------------------------------------------------
+* 3. HYBRID BUFFER BANK (8.33F EDLC + 4000uF Solid Polymer Bank)
+* ------------------------------------------------------------------------------
+* Fast transient branch (Polymer + MLCC)
+R_esr_poly cap_in poly_node {ESR_POLY}
+C_poly poly_node 0 {C_POLY_BANK} IC={V_BUS_NOM}
+
+* Long burst branch (6x 50F in series = 8.33F, 75mR total ESR)
+R_esr_edlc cap_in edlc_node {ESR_EDLC_STRING}
+C_edlc edlc_node 0 {C_EDLC_STRING} IC={V_BUS_NOM}
+
+* ------------------------------------------------------------------------------
+* 4. CURRENT SENSING & HARDWARE eFUSE (Kelvin Shunt + Comparator + Gate Pull)
+* ------------------------------------------------------------------------------
+* 2 mOhm Kelvin Sense Resistor
+R_sense cap_in v_sw {R_SHUNT}
+
+* Comparator tripping when I_load > 40A (V_sense > 80mV)
+B_comp_trip trip_raw 0 V = ( (V(cap_in) - V(v_sw)) > ({TRIP_CURRENT} * {R_SHUNT}) ) ? 5.0 : 0.0
+R_trip_del trip_raw trip_latch 50
+C_trip_del trip_latch 0 1n
+
+* Solid-state disconnect switch (eFuse FETs, Rds_on = 1.2 mOhm)
+S_efuse v_sw act_pos trip_latch 0 SW_EFUSE
+.model SW_EFUSE SW(Ron=0.0012 Roff=1Meg Vt=2.5 Vh=0.5)
+
+* ------------------------------------------------------------------------------
+* 5. FAIL-NEUTRAL PASSIVE DYNAMIC BRAKE (1.5 Ohm Dissipative Path)
+* ------------------------------------------------------------------------------
+S_brake act_pos brake_node trip_latch 0 SW_BRAKE
+.model SW_BRAKE SW(Ron=1Meg Roff=0.01 Vt=2.5 Vh=0.5)
+R_dynamic_brake brake_node 0 {R_BRAKE}
+
+* ------------------------------------------------------------------------------
+* 6. DYNAMIC LOAD (25A / 25Hz Gust Burst + Short-Circuit Fault at t=1.2s)
+* ------------------------------------------------------------------------------
+I_actuator act_pos 0 PULSE(0 25 0.05 100u 100u 12m 40m)
+I_fault act_pos 0 PULSE(0 45 1.200 100n 100n 50m 10)
+
+* ------------------------------------------------------------------------------
+* SIMULATION COMMANDS
+* ------------------------------------------------------------------------------
+.tran 0 1.500 0.800 10u UIC
+.probe
+.end
