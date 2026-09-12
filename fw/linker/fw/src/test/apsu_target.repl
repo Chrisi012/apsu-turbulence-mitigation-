@@ -1,0 +1,46 @@
+// =============================================================================
+// Renode Platform Description: APSU-01 Safety Target (STM32G431K8 Subset)
+// =============================================================================
+
+cpu: CPU.CortexM @ sysbus
+    cpuType: "cortex-m4"
+    nvic: nvic
+
+nvic: IRQControllers.NVIC @ sysbus 0xE000E000
+    priorityMask: 0xF0
+    systick: systick
+
+systick: Timers.CortexMSystemTick @ nvic 15
+    frequency: 16000000
+
+flash: Memory.MappedMemory @ sysbus 0x08000000
+    size: 0x00020000
+
+sram: Memory.MappedMemory @ sysbus 0x20000000
+    size: 0x00008000
+
+// RCC Register Stub (to avoid unhandled write exceptions on clock init)
+rcc: Memory.MappedMemory @ sysbus 0x40021000
+    size: 0x400
+
+// GPIOA (PA8: Watchdog WDI pin)
+gpioPortA: Python.PythonPeripheral @ sysbus 0x48000000
+    size: 0x400
+    initable: true
+    script: '''
+def WriteDoubleWord(offset, value):
+    pass
+def ReadDoubleWord(offset):
+    return 0
+'''
+
+// GPIOB (PB3: eFuse Gate / Brake signal)
+gpioPortB: Python.PythonPeripheral @ sysbus 0x48000400
+    size: 0x400
+    initable: true
+    script: '''
+def WriteDoubleWord(offset, value):
+    pass
+def ReadDoubleWord(offset):
+    return 0
+'''
