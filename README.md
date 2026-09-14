@@ -145,10 +145,11 @@ renode test/apsu_sim.resc
 python3 test/hil_test_runner.py
 ```
 
----
-
-## Author
+## Author & Engineering Background
 
 **Christian Pietrantonio**  
-Electronic Engineer  
-Focus: Embedded Firmware, Power Electronics & Avionics Hardware Integration
+*Electronic Engineering & Digital Technologies* — Università Politecnica delle Marche  
+
+* **Focus:** Bare-Metal Embedded Systems, Functional Safety, Hardware-in-the-Loop Validation & Power Architectures.
+* **Repository Maintenance:** Active engineering study (Phase 1 / TRL 3).
+
