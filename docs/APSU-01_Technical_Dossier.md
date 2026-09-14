@@ -80,3 +80,19 @@ The resulting electrodynamic damping ratio ($\zeta \approx 0.68$) drives the sur
 | **Hardware Comparator** | Latch-up / Stuck Low | Analog cutoff does not trigger at 40A | Redundant software interrupt via circular DMA ADC samples ($< 2.14\text{ ms}$ latency) |
 | **Microcontroller Clock** | HSE/HSI Oscillator Stall | Supervisor loop stops executing | External TI TPS3851 window watchdog pulls Master Reset and drops eFuse gate line |
 | **14V Bus Supply** | Engine Crank Sag ($V_{\text{bus}} < 9\text{ V}$) | Buffer dumps reverse energy into starter | Back-to-back N-channel FET configuration isolates reverse conduction path |
+---
+
+## 6. Engineering Trade-offs & Known Environmental Constraints
+
+### 6.1 Thermal Derating in Enclosed Wingtips (DO-160G Section 4)
+Under high ambient soak conditions on the ramp, enclosed composite or metal wingtip cavities can reach internal temperatures exceeding +50°C to +55°C. EDLC commercial chemistry degrades rapidly if held at maximum rated voltage (2.7 V) under these conditions due to accelerated electrolyte decomposition.
+* **Derating Rule:** The nominal operating float voltage per cell is derated from 2.7 V to 2.3 V above +50°C.
+* **System Impact:** The usable energy buffer drops by approximately 27% (from ~129.8 J to ~94.5 J). Sizing margins have been verified in SPICE to guarantee a minimum 3-pulse 25A burst even under derated conditions.
+
+### 6.2 Cell Balancing Dissipation vs. Standby Parasitic Drain
+Passive resistive balancing across the 6 EDLC cells draws a quiescent leakage current of 30–50 µA per branch. Over extended hangared periods without an active ground disconnect switch, this parasitic drain risks discharging the aircraft primary lead-acid battery.
+* **Mitigation:** An optocoupled disconnect circuit tied to the avionics master bus relay is under evaluation for the Phase 2 PCB revision (tracked in Issue #1).
+
+### 6.3 Gate Driver Propagation Delay at Low Temperatures (-20°C)
+The nominal 3.35 µs eFuse cutoff latency is simulated at 25°C. At cold soak temperatures (-20°C), increased MOSFET threshold voltage (Vth) and driver propagation latency introduce an estimated dispersion up to ~4.5 µs. This corner case is tracked in Issue #2 and will be validated on the physical test bench.
+
