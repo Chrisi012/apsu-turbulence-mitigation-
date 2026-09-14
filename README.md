@@ -1,7 +1,9 @@
 # APSU-01: Aero-Power & Safety Unit
 ### Subsystem for Fast Power Buffering, Bus Stabilization and Fail-Neutral Actuation in Active Gust Mitigation Systems
 
----
+> **Project Status: TRL 3 (Analytical & Simulation Validation)**  
+> *Current scope covers dynamic SPICE electrical modeling, sub-5µs analog eFuse validation, and bare-metal supervisory firmware with virtual HIL fault-injection. Physical 4-layer PCB prototyping and environmental chamber testing are targeted for Phase 2.*
+
 
 ## Overview
 
