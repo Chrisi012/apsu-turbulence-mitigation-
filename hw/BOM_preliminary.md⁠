@@ -1,0 +1,13 @@
+# APSU-01: Preliminary Bill of Materials (BOM) — Phase 2 Hardware
+
+| Component Category | Designator / Part | Reference MPN | Package | Key Specifications |
+| :--- | :--- | :--- | :--- | :--- |
+| **Supervisory MCU** | U1 | STM32G431KBU6 | UFQFPN-32 | ARM Cortex-M4 @ 170MHz, 128KB Flash, Hardware CORDIC/FMAC |
+| **External Window WDT** | U2 | TPS3851G33EDDR | SOT-23-6 | Precision Window Watchdog (t_WDL=8ms, t_WDU=12ms window) |
+| **Bidirectional eFuse FETs** | Q1, Q2 | IPT012N08N5 | PG-HSOF-8 | 80V N-Ch OptiMOS, 1.2 mΩ RDS(on), 300A continuous |
+| **Current Sense Amp** | U3 | INA240A2PWR | TSSOP-8 | Bi-directional, Enhanced PWM Rejection, Gain: 50 V/V |
+| **Analog Comparator** | U4 | TLV3501AIDBVR | SOT-23-6 | 4.5 ns Propagation Delay, Rail-to-Rail, Push-Pull Output |
+| **Current Shunt Resistor** | R_S1 | WSBS8518L2000JK | Power Metal Strip | 2 mΩ, 36W pulse rating, low parasitic inductance (< 5 nH) |
+| **Energy Buffer EDLC** | C1–C6 | BCAP0050 P270 T01 | Radial Snap-in | 50F, 2.7V nominal, 6-cell series bank (8.33F eq. @ 16.2V) |
+| **High-Frequency Decoupling** | C7–C10 | 16SVPF1000M | Radial SMD | 1000 µF / 16V OS-CON Polymer, ultra-low ESR (12 mΩ) |
+| **Dynamic Braking Shunt** | R_BRK | MELF / Power Wirewound | TO-220 | 1.5 Ω, 50W peak pulse rating |
